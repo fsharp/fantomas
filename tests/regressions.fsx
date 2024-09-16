@@ -16,7 +16,7 @@ let fantomasBinary =
     </> "Fantomas"
     </> "bin"
     </> "Release"
-    </> "net6.0"
+    </> "net8.0"
     </> "fantomas.dll"
 
 let repositoriesRoot = __SOURCE_DIRECTORY__ </> ".repositories"

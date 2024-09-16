@@ -90,5 +90,5 @@ module IgnoreFile =
             try
                 ignoreFile.IsIgnored fullPath
             with ex ->
-                elog $"%A{ex}"
+                elog $"%O{ex}"
                 false

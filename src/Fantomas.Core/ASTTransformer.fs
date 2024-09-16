@@ -117,20 +117,27 @@ let mkConstant (creationAide: CreationAide) c r : Constant =
     match c with
     | SynConst.Unit -> mkUnit r |> Constant.Unit
     | SynConst.Bool b -> stn (if b then "true" else "false") r |> Constant.FromText
-    | SynConst.Byte v -> orElse $"%A{v}"
-    | SynConst.SByte v -> orElse $"%A{v}"
-    | SynConst.Int16 v -> orElse $"%A{v}"
-    | SynConst.Int32 v -> orElse $"%A{v}"
-    | SynConst.Int64 v -> orElse $"%A{v}"
-    | SynConst.UInt16 v -> orElse $"%A{v}"
-    | SynConst.UInt16s v -> orElse $"%A{v}"
-    | SynConst.UInt32 v -> orElse $"%A{v}"
-    | SynConst.UInt64 v -> orElse $"%A{v}"
-    | SynConst.Double v -> orElse $"%A{v}"
-    | SynConst.Single v -> orElse $"%A{v}"
-    | SynConst.Decimal v -> orElse $"%A{v}"
-    | SynConst.IntPtr v -> orElse $"%A{v}"
-    | SynConst.UIntPtr v -> orElse $"%A{v}"
+    | SynConst.Byte v -> orElse (v.ToString() + "uy")
+    | SynConst.SByte v -> orElse (v.ToString() + "y")
+    | SynConst.Int16 v -> orElse (v.ToString() + "s")
+    | SynConst.Int32 v -> orElse (v.ToString())
+    | SynConst.Int64 v -> orElse (v.ToString() + "L")
+    | SynConst.UInt16 v -> orElse (v.ToString() + "us")
+    // This formatting is likely imperfect, but SynConst.UInt16s is only used internally to the F# compiler.
+    | SynConst.UInt16s v ->
+        orElse (
+            v
+            |> Array.map (fun uint16 -> (uint16.ToString() + "us"))
+            |> String.concat "; "
+            |> sprintf "[| %s |]"
+        )
+    | SynConst.UInt32 v -> orElse (v.ToString() + "u")
+    | SynConst.UInt64 v -> orElse (v.ToString() + "uL")
+    | SynConst.Double v -> orElse (v.ToString("r"))
+    | SynConst.Single v -> orElse (v.ToString("r") + "f")
+    | SynConst.Decimal v -> orElse (sprintf "%sM" (v.ToString()))
+    | SynConst.IntPtr v -> orElse (v.ToString() + "n")
+    | SynConst.UIntPtr v -> orElse (v.ToString() + "un")
     | SynConst.UserNum(v, s) ->
         let fallback () = $"%s{v}%s{s}"
         stn (creationAide.TextFromSource fallback r) r |> Constant.FromText

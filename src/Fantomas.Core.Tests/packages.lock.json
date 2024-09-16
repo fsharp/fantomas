@@ -19,9 +19,9 @@
       },
       "FSharp.Core": {
         "type": "Direct",
-        "requested": "[6.0.1, )",
-        "resolved": "6.0.1",
-        "contentHash": "VrFAiW8dEEekk+0aqlbvMNZzDvYXmgWZwAt68AUBqaWK8RnoEVUNglj66bZzhs4/U63q0EfXlhcEKnH1sTYLjw=="
+        "requested": "[8.0.100, )",
+        "resolved": "8.0.100",
+        "contentHash": "ZOVZ/o+jI3ormTZOa28Wh0tSRoyle1f7lKFcUN61sPiXI7eDZu8eSveFybgTeyIEyW0ujjp31cp7GOglDgsNEg=="
       },
       "FsUnit": {
         "type": "Direct",
@@ -149,14 +149,14 @@
       "fantomas.core": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[6.0.1, )",
+          "FSharp.Core": "[8.0.100, )",
           "Fantomas.FCS": "[1.0.0, )"
         }
       },
       "fantomas.fcs": {
         "type": "Project",
         "dependencies": {
-          "FSharp.Core": "[6.0.1, )",
+          "FSharp.Core": "[8.0.100, )",
           "System.Collections.Immutable": "[7.0.0, )",
           "System.Diagnostics.DiagnosticSource": "[7.0.0, )",
           "System.Memory": "[4.5.5, )",

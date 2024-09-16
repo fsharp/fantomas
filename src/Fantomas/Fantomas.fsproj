@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <!-- Don't create localization (en-US, etc) folders with resources -->
     <!-- https://github.com/dotnet/fsharp/issues/6007#issuecomment-547041463 -->
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
@@ -12,6 +12,7 @@
     <IsPackable>true</IsPackable>
     <RootNamespace>Fantomas</RootNamespace>
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+    <PublishAot Condition=" '$(DoPublishAot)' != ''">true</PublishAot>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fantomas.Client\Fantomas.Client.fsproj" />
@@ -34,11 +35,11 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="FSharp.Core"/> 
     <PackageReference Include="Serilog"  />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="StreamJsonRpc" />
-    <PackageReference Include="Argu" />
+    <PackageReference Include="Fargo.Cmdline" />
     <PackageReference Include="Thoth.Json.Net" />
     <PackageReference Include="SerilogTraceListener" />
     <PackageReference Include="editorconfig" />

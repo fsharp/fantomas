@@ -3,7 +3,7 @@
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     </PropertyGroup>
     <ItemGroup>
-        <PackageVersion Include="FSharp.Core" Version="6.0.1"/>
+        <PackageVersion Include="FSharp.Core" Version="8.0.100"/>
         <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
         <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="7.0.0" />
         <PackageVersion Include="System.Memory" Version="4.5.5" />
@@ -22,7 +22,7 @@
         <PackageVersion Include="Serilog" Version="3.1.1"/>
         <PackageVersion Include="Serilog.Sinks.Console" Version="5.0.1" />
         <PackageVersion Include="SerilogTraceListener" Version="3.2.1-dev-00011" />
-        <PackageVersion Include="Argu" Version="6.2.4" />
+        <PackageVersion Include="Fargo.Cmdline" Version="1.1.14" />
         <PackageVersion Include="Thoth.Json.Net" Version="8.0.0" />
         <PackageVersion Include="editorconfig" Version="0.15.0" />
         <PackageVersion Include="Ignore" Version="0.1.50" />

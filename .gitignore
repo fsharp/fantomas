@@ -200,3 +200,4 @@ tests/.repositories/**
 # Analyzer files
 .analyzerpackages
 *.sarif
+.fake

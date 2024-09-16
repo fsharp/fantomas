@@ -350,7 +350,7 @@ let mkTreeWithSingleNode (node: Node) : TreeForSelection =
 let printTriviaNode (node: Node) : unit =
     let rec visit (level: int) (node: Node) =
         let name = node.GetType().Name
-        printfn "%s%s: %A" ("".PadRight(level * 2)) name node.Range
+        printfn "%s%s: %O" ("".PadRight(level * 2)) name node.Range
         Array.iter (visit (level + 1)) node.Children
 
     visit 0 node

@@ -61,6 +61,10 @@ pipeline "Build" {
     stage "Build" { run "dotnet build -c Release --tl" }
     stage "UnitTests" { run "dotnet test -c Release --tl" }
     stage "Pack" { run "dotnet pack --no-restore -c Release --tl" }
+    stage "PublishAOT" {
+        run
+            "dotnet publish src/Fantomas/Fantomas.fsproj -r linux-x64 -c Release -p:DoPublishAot=yes -p:RestoreLockedMode=false --tl"
+    }
     stage "Docs" {
         whenNot { platformOSX }
         envVars
@@ -442,12 +446,17 @@ pipeline "Release" {
                         |> Seq.filter (fun nupkg -> not (nupkg.Contains("Fantomas.Client")))
                         |> Seq.toArray
 
+                    let aotCompiledExecutableFiles =
+                        [ "fantomas"; "fantomas.dbg" ]
+                        |> List.map (fun file -> $"artifacts/publish/Fantomas/release_linux-x64/%s{file}")
+
                     let! nugetExitCodes = nugetPackages |> Array.map pushPackage |> Async.Sequential
 
                     let notes = getReleaseNotes currentRelease lastRelease
                     let noteFile = Path.GetTempFileName()
                     File.WriteAllText(noteFile, notes)
-                    let files = nugetPackages |> String.concat " "
+                    let files =
+                        [ yield! nugetPackages; yield! aotCompiledExecutableFiles ] |> String.concat " "
 
                     // We create a draft release for minor and majors. Those that requires a manual publish.
                     // This is to allow us to add additional release notes when it makes sense.
