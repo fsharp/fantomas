@@ -64,6 +64,8 @@ let (|Number|_|) (d: string) =
     | true, d -> Some(box d)
     | _ -> None
 
+let (|PatternMatchStyle|_|) pms = PatternMatchStyle.OfConfigString pms
+
 let (|MultilineFormatterType|_|) mft =
     MultilineFormatterType.OfConfigString mft
 
@@ -86,6 +88,7 @@ let parseOptionsFromEditorConfig
         | true, Number n -> n
         | true, Boolean b -> b
         | true, MultilineFormatterType mft -> box mft
+        | true, PatternMatchStyle pms -> box pms
         | true, EndOfLineStyle eol -> box eol
         | true, BracketStyle bs -> box bs
         | _ -> defaultValue)
@@ -104,6 +107,9 @@ let configToEditorConfig (config: FormatConfig) : string =
         | :? System.Int32 as i -> $"%s{toEditorConfigName recordField.PropertyName}=%d{i}" |> Some
         | :? MultilineFormatterType as mft ->
             $"%s{toEditorConfigName recordField.PropertyName}=%s{MultilineFormatterType.ToConfigString mft}"
+            |> Some
+        | :? PatternMatchStyle as pms ->
+            $"%s{toEditorConfigName recordField.PropertyName}=%s{PatternMatchStyle.ToConfigString pms}"
             |> Some
         | :? EndOfLineStyle as eols ->
             $"%s{toEditorConfigName recordField.PropertyName}=%s{EndOfLineStyle.ToConfigString eols}"

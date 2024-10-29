@@ -543,3 +543,22 @@ fsharp_experimental_elmish = true
     let config = EditorConfig.readConfiguration fsharpFile.FSharpFile
 
     Assert.That(config.ExperimentalElmish, Is.True)
+
+[<Test>]
+let fsharp_consistent_pattern_matching_style () =
+    let rootDir = tempName ()
+
+    let editorConfig =
+        """
+[*.fs]
+fsharp_experimental_pattern_match_style = consistent
+"""
+
+    use configFixture =
+        new ConfigurationFile(defaultConfig, rootDir, content = editorConfig)
+
+    use fsharpFile = new FSharpFile(rootDir)
+
+    let config = EditorConfig.readConfiguration fsharpFile.FSharpFile
+
+    Assert.That(config.ExperimentalPatternMatchStyle, Is.EqualTo Consistent)

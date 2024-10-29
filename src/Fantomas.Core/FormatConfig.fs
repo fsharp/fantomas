@@ -26,6 +26,21 @@ type MultilineFormatterType =
         | "number_of_items" -> Some MultilineFormatterType.NumberOfItems
         | _ -> None
 
+type PatternMatchStyle =
+    | LineSpecific
+    | Consistent
+
+    static member ToConfigString(cfg: PatternMatchStyle) =
+        match cfg with
+        | LineSpecific -> "line_specific"
+        | Consistent -> "consistent"
+
+    static member OfConfigString(cfgString: string) =
+        match cfgString with
+        | "line_specific" -> Some LineSpecific
+        | "consistent" -> Some Consistent
+        | _ -> None
+
 type MultilineBracketStyle =
     | Cramped
     | Aligned
@@ -227,7 +242,12 @@ type FormatConfig =
 
       [<Category("Convention")>]
       [<DisplayName("Applies the Stroustrup style to the final (two) array or list argument(s) in a function application")>]
-      ExperimentalElmish: bool }
+      ExperimentalElmish: bool
+
+      [<Category("Indentation")>]
+      [<DisplayName("How to format pattern match expression")>]
+      [<Description("Possible options include each line judged separately (default), or consistent (either all single line or all multiline)")>]
+      ExperimentalPatternMatchStyle: PatternMatchStyle }
 
     member x.IsStroustrupStyle = x.MultilineBracketStyle = Stroustrup
 
@@ -268,4 +288,5 @@ type FormatConfig =
           MultilineBracketStyle = Cramped
           KeepMaxNumberOfBlankLines = 100
           NewlineBeforeMultilineComputationExpression = true
-          ExperimentalElmish = false }
+          ExperimentalElmish = false
+          ExperimentalPatternMatchStyle = LineSpecific }
