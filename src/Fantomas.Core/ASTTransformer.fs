@@ -1,5 +1,7 @@
 ﻿module internal rec Fantomas.Core.ASTTransformer
 
+#nowarn "FS1182"
+
 open System.Collections.Generic
 open System.Text.RegularExpressions
 open Fantomas.FCS.Text
@@ -442,6 +444,7 @@ let (|IndexWithoutDot|_|) expr =
         Some(identifierExpr, indexExpr)
     | _ -> None
 
+// :: a ::
 let (|MultipleConsInfixApps|_|) expr =
     let rec visit expr (headAndLastOperator: (SynExpr * SingleTextNode) option) (xs: Queue<SingleTextNode * SynExpr>) =
         match expr with
@@ -1223,8 +1226,8 @@ let mkExpr (creationAide: CreationAide) (e: SynExpr) : Expr =
         ExprPrefixAppNode(stn operatorName ident.idRange, mkExpr creationAide e2, exprRange)
         |> Expr.PrefixApp
 
-    | NewlineInfixApps(head, xs)
-    | MultipleConsInfixApps(head, xs)
+    // | NewlineInfixApps(head, xs)
+    // | MultipleConsInfixApps(head, xs)
     | SameInfixApps(head, xs) ->
         let rest = xs |> List.map (fun (operator, e) -> operator, mkExpr creationAide e)
 

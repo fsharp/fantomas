@@ -5,8 +5,9 @@ open Fantomas.Core.Context
 open Fantomas.Core.SyntaxOak
 open Microsoft.FSharp.Core.CompilerServices
 
+let arithmeticOperators = set [ "+" ]
 let noBreakInfixOps = set [| "="; ">"; "<"; "%" |]
-let newLineInfixOps = set [ "|>"; "||>"; "|||>"; ">>"; ">>=" ]
+// let newLineInfixOps = set [ "|>"; "||>"; "|||>"; ">>"; ">>=" ]
 
 let rec (|UppercaseType|LowercaseType|) (t: Type) : Choice<unit, unit> =
     let upperOrLower (v: string) =
@@ -781,81 +782,81 @@ let genExpr (e: Expr) =
             | _ -> fallback
         | _ -> fallback
         |> genNode node
-    | Expr.SameInfixApps node ->
-        let headIsSynExprLambdaOrIfThenElse = isLambdaOrIfThenElse node.LeadingExpr
-
-        let shortExpr =
-            onlyIf headIsSynExprLambdaOrIfThenElse sepOpenT
-            +> genExpr node.LeadingExpr
-            +> onlyIf headIsSynExprLambdaOrIfThenElse sepCloseT
-            +> sepSpace
-            +> col sepSpace node.SubsequentExpressions (fun (operator, rhs) ->
-                genSingleTextNode operator
-                +> sepSpace
-                +> onlyIf (isLambdaOrIfThenElse rhs) sepOpenT
-                +> genExpr rhs
-                +> onlyIf (isLambdaOrIfThenElse rhs) sepCloseT)
-
-        let multilineExpr =
-            match node.SubsequentExpressions with
-            | [] -> genExpr node.LeadingExpr
-            | (operator, e2) :: es ->
-                let m =
-                    Fantomas.FCS.Text.Range.unionRanges (Expr.Node node.LeadingExpr).Range (Expr.Node e2).Range
-
-                genMultilineInfixExpr (ExprInfixAppNode(node.LeadingExpr, operator, e2, m))
-                +> sepNln
-                +> col sepNln es (fun (operator, e) ->
-                    genSingleTextNode operator
-                    +> sepNlnWhenWriteBeforeNewlineNotEmptyOr sepSpace
-                    +> (fun ctx ->
-                        match e with
-                        | Expr.Lambda _ when
-                            newLineInfixOps.Contains operator.Text
-                            && ctx.Config.IndentSize <= operator.Text.Length
-                            ->
-                            // Special measure to account for https://github.com/fsprojects/fantomas/issues/870
-                            (indent +> genExprInMultilineInfixExpr e +> unindent) ctx
-                        | _ -> genExprInMultilineInfixExpr e ctx))
-
-        fun ctx ->
-            genNode
-                node
-                (atCurrentColumn (isShortExpression ctx.Config.MaxInfixOperatorExpression shortExpr multilineExpr))
-                ctx
-
-    | Expr.InfixApp node ->
-        let genOnelinerInfixExpr (node: ExprInfixAppNode) =
-            let genExpr e =
-                match e with
-                | Expr.Record _
-                | Expr.AnonStructRecord _ -> atCurrentColumnIndent (genExpr e)
-                | _ -> genExpr e
-
-            genExpr node.LeftHandSide
-            +> sepSpace
-            +> genSingleTextNode node.Operator
-            +> sepNlnWhenWriteBeforeNewlineNotEmpty
-            +> sepSpace
-            +> genExpr node.RightHandSide
-
-        if
-            isLambdaOrIfThenElse node.LeftHandSide
-            && newLineInfixOps.Contains node.Operator.Text
-        then
-            genNode node (genMultilineInfixExpr node)
-        else
-            fun ctx ->
-                genNode
-                    node
-                    (isShortExpression
-                        ctx.Config.MaxInfixOperatorExpression
-                        (genOnelinerInfixExpr node)
-                        (ifElse
-                            (noBreakInfixOps.Contains(node.Operator.Text))
-                            (genOnelinerInfixExpr node)
-                            (genMultilineInfixExpr node)))
-                    ctx
+    // | Expr.SameInfixApps node ->
+    //     let headIsSynExprLambdaOrIfThenElse = isLambdaOrIfThenElse node.LeadingExpr
+    //
+    //     let shortExpr =
+    //         onlyIf headIsSynExprLambdaOrIfThenElse sepOpenT
+    //         +> genExpr node.LeadingExpr
+    //         +> onlyIf headIsSynExprLambdaOrIfThenElse sepCloseT
+    //         +> sepSpace
+    //         +> col sepSpace node.SubsequentExpressions (fun (operator, rhs) ->
+    //             genSingleTextNode operator
+    //             +> sepSpace
+    //             +> onlyIf (isLambdaOrIfThenElse rhs) sepOpenT
+    //             +> genExpr rhs
+    //             +> onlyIf (isLambdaOrIfThenElse rhs) sepCloseT)
+    //
+    //     let multilineExpr =
+    //         match node.SubsequentExpressions with
+    //         | [] -> genExpr node.LeadingExpr
+    //         | (operator, e2) :: es ->
+    //             let m =
+    //                 Fantomas.FCS.Text.Range.unionRanges (Expr.Node node.LeadingExpr).Range (Expr.Node e2).Range
+    //
+    //             genMultilineInfixExpr (ExprInfixAppNode(node.LeadingExpr, operator, e2, m))
+    //             +> sepNln
+    //             +> col sepNln es (fun (operator, e) ->
+    //                 genSingleTextNode operator
+    //                 +> sepNlnWhenWriteBeforeNewlineNotEmptyOr sepSpace
+    //                 +> (fun ctx ->
+    //                     match e with
+    //                     | Expr.Lambda _ when
+    //                         newLineInfixOps.Contains operator.Text
+    //                         && ctx.Config.IndentSize <= operator.Text.Length
+    //                         ->
+    //                         // Special measure to account for https://github.com/fsprojects/fantomas/issues/870
+    //                         (indent +> genExprInMultilineInfixExpr e +> unindent) ctx
+    //                     | _ -> genExprInMultilineInfixExpr e ctx))
+    //
+    //     fun ctx ->
+    //         genNode
+    //             node
+    //             (atCurrentColumn (isShortExpression ctx.Config.MaxInfixOperatorExpression shortExpr multilineExpr))
+    //             ctx
+    //
+    // | Expr.InfixApp node ->
+    //     let genOnelinerInfixExpr (node: ExprInfixAppNode) =
+    //         let genExpr e =
+    //             match e with
+    //             | Expr.Record _
+    //             | Expr.AnonStructRecord _ -> atCurrentColumnIndent (genExpr e)
+    //             | _ -> genExpr e
+    //
+    //         genExpr node.LeftHandSide
+    //         +> sepSpace
+    //         +> genSingleTextNode node.Operator
+    //         +> sepNlnWhenWriteBeforeNewlineNotEmpty
+    //         +> sepSpace
+    //         +> genExpr node.RightHandSide
+    //
+    //     if
+    //         isLambdaOrIfThenElse node.LeftHandSide
+    //         && newLineInfixOps.Contains node.Operator.Text
+    //     then
+    //         genNode node (genMultilineInfixExpr node)
+    //     else
+    //         fun ctx ->
+    //             genNode
+    //                 node
+    //                 (isShortExpression
+    //                     ctx.Config.MaxInfixOperatorExpression
+    //                     (genOnelinerInfixExpr node)
+    //                     (ifElse
+    //                         (noBreakInfixOps.Contains(node.Operator.Text))
+    //                         (genOnelinerInfixExpr node)
+    //                         (genMultilineInfixExpr node)))
+    //                 ctx
 
     | Expr.IndexWithoutDot node ->
         let genIdentifierExpr =
@@ -1325,7 +1326,7 @@ let genExpr (e: Expr) =
                          +> genExpr node.ElseExpr)
                         long
                         ctx)
-        |> atCurrentColumnIndent
+        // |> atCurrentColumnIndent
         |> genNode node
     | Expr.IfThenElif node ->
         // multiple branches but no else expr
@@ -1599,6 +1600,65 @@ let genExpr (e: Expr) =
         genSingleTextNode node.Then
         +> sepSpaceOrIndentAndNlnIfExpressionExceedsPageWidth (genExpr node.Expr)
         |> genNode node
+    | Expr.SameInfixApps node ->
+        genExpr node.LeadingExpr
+        +> sepSpace
+        +> colEx
+            (fun (operator, expr) ctx ->
+                ignore ((operator: SingleTextNode), expr)
+                sepSpace ctx
+
+            // if arithmeticOperators.Contains(operator.Text)
+            //    && futureNlnCheck (genSingleTextNode operator +> genExpr expr) ctx then
+            //     sepNln ctx
+            // else
+            //     sepSpace ctx
+            )
+            node.SubsequentExpressions
+            (fun (operator, expr) ->
+                genSingleTextNode operator
+                +> expressionFitsOnRestOfLine (sepSpace +> genExpr expr) (sepNln +> genExpr expr))
+
+    | Expr.InfixApp node ->
+        let short =
+            genExpr node.LeftHandSide
+            +> sepSpace
+            +> genSingleTextNode node.Operator
+            +> sepSpace
+            +> genExpr node.RightHandSide
+
+        let long ctx =
+            if
+                arithmeticOperators.Contains(node.Operator.Text)
+                && not (
+                    match node.LeftHandSide with
+                    | Expr.Match _ -> futureNlnCheck (genExpr node.LeftHandSide) ctx
+                    | _ -> false
+                )
+            then
+                (genExpr node.LeftHandSide
+                 +> sepSpace
+                 +> genSingleTextNode node.Operator
+                 +> sepNln
+                 +> genExpr node.RightHandSide)
+                    ctx
+            elif noBreakInfixOps.Contains(node.Operator.Text) then
+                (genExpr node.LeftHandSide
+                 +> sepSpace
+                 +> genSingleTextNode node.Operator
+                 +> indentSepNlnUnindent (genExpr node.RightHandSide))
+                    ctx
+            else
+                (genExpr node.LeftHandSide
+                 +> sepNln
+                 +> indent
+                 +> genSingleTextNode node.Operator
+                 +> sepSpace
+                 +> genExpr node.RightHandSide
+                 +> unindent)
+                    ctx
+
+        expressionFitsOnRestOfLine short long
 
 let genQuoteExpr (node: ExprQuoteNode) =
     genSingleTextNode node.OpenToken
@@ -1849,7 +1909,7 @@ let genMultilineFunctionApplicationArguments (argExpr: Expr) =
 
     let genExpr e =
         match e with
-        | Expr.InfixApp infixNode when (infixNode.Operator.Text = "=") -> genNamedArgumentExpr infixNode
+        // | Expr.InfixApp infixNode when (infixNode.Operator.Text = "=") -> genNamedArgumentExpr infixNode
         | _ -> genExpr e
 
     match argExpr with
@@ -1868,24 +1928,24 @@ let genTupleExpr (node: ExprTupleNode) =
     // see 2819
     let wrapInfixAppRhsInParenIfNeeded expr =
         match expr with
-        | Expr.InfixApp exprInfixAppNode ->
-            match exprInfixAppNode.RightHandSide with
-            | IsLambdaOrIfThenElse e ->
-                let parenNode =
-                    mkExprParenNode
-                        (SingleTextNode("(", Fantomas.FCS.Text.Range.Zero))
-                        e
-                        (SingleTextNode(")", Fantomas.FCS.Text.Range.Zero))
-                        Fantomas.FCS.Text.Range.Zero
-
-                ExprInfixAppNode(
-                    exprInfixAppNode.LeftHandSide,
-                    exprInfixAppNode.Operator,
-                    parenNode,
-                    Fantomas.FCS.Text.range.Zero
-                )
-                |> Expr.InfixApp
-            | _ -> expr
+        // | Expr.InfixApp exprInfixAppNode ->
+        //     match exprInfixAppNode.RightHandSide with
+        //     | IsLambdaOrIfThenElse e ->
+        //         let parenNode =
+        //             mkExprParenNode
+        //                 (SingleTextNode("(", Fantomas.FCS.Text.Range.Zero))
+        //                 e
+        //                 (SingleTextNode(")", Fantomas.FCS.Text.Range.Zero))
+        //                 Fantomas.FCS.Text.Range.Zero
+        //
+        //         ExprInfixAppNode(
+        //             exprInfixAppNode.LeftHandSide,
+        //             exprInfixAppNode.Operator,
+        //             parenNode,
+        //             Fantomas.FCS.Text.range.Zero
+        //         )
+        //         |> Expr.InfixApp
+        //     | _ -> expr
         | _ -> expr
 
     let shortExpression =
@@ -1915,15 +1975,15 @@ let genTupleMultiline (node: ExprTupleNode) =
                 match e with
                 | Expr.Match _
                 | Expr.Lambda _ -> true
-                | Expr.InfixApp node ->
-                    match node.RightHandSide with
-                    | Expr.Match _
-                    | Expr.Lambda _ -> true
-                    | _ -> false
-                | Expr.SameInfixApps node ->
-                    match List.last node.SubsequentExpressions with
-                    | _, Expr.Lambda _ -> true
-                    | _ -> false
+                // | Expr.InfixApp node ->
+                //     match node.RightHandSide with
+                //     | Expr.Match _
+                //     | Expr.Lambda _ -> true
+                //     | _ -> false
+                // | Expr.SameInfixApps node ->
+                //     match List.last node.SubsequentExpressions with
+                //     | _, Expr.Lambda _ -> true
+                //     | _ -> false
                 | _ -> false
             | _ -> false)
 
@@ -1934,7 +1994,7 @@ let genTupleMultiline (node: ExprTupleNode) =
         | Choice1Of2 e ->
             match e with
             | IsIfThenElse _ when (idx < lastIndex) -> autoParenthesisIfExpressionExceedsPageWidth (genExpr e)
-            | Expr.InfixApp node when (node.Operator.Text = "=") -> genNamedArgumentExpr node
+            // | Expr.InfixApp node when (node.Operator.Text = "=") -> genNamedArgumentExpr node
             | _ -> genExpr e
         | Choice2Of2 comma ->
             if containsLambdaOrMatchExpr then
@@ -1944,21 +2004,21 @@ let genTupleMultiline (node: ExprTupleNode) =
 
     coli sepNone node.Items genItem
 
-let genNamedArgumentExpr (node: ExprInfixAppNode) =
-    let short =
-        genExpr node.LeftHandSide
-        +> sepSpace
-        +> genSingleTextNode node.Operator
-        +> sepSpace
-        +> genExpr node.RightHandSide
-
-    let long =
-        genExpr node.LeftHandSide
-        +> sepSpace
-        +> genSingleTextNode node.Operator
-        +> indentSepNlnUnindentUnlessStroustrup (fun e -> sepSpace +> genExpr e) node.RightHandSide
-
-    expressionFitsOnRestOfLine short long |> genNode node
+// let genNamedArgumentExpr (node: ExprInfixAppNode) =
+//     let short =
+//         genExpr node.LeftHandSide
+//         +> sepSpace
+//         +> genSingleTextNode node.Operator
+//         +> sepSpace
+//         +> genExpr node.RightHandSide
+//
+//     let long =
+//         genExpr node.LeftHandSide
+//         +> sepSpace
+//         +> genSingleTextNode node.Operator
+//         +> indentSepNlnUnindentUnlessStroustrup (fun e -> sepSpace +> genExpr e) node.RightHandSide
+//
+//     expressionFitsOnRestOfLine short long |> genNode node
 
 let genLambdaAux (includeClosingParen: bool) (node: ExprLambdaNode) =
     let genPats =
@@ -2177,110 +2237,110 @@ let genControlExpressionStartCore
     +> leaveNode endKeyword
 
 // Caller of this function is responsible for genNode!
-let genMultilineInfixExpr (node: ExprInfixAppNode) =
-    let genLhs (ctx: Context) =
-        match node.LeftHandSide with
-        | IsIfThenElse _ when (ctx.Config.IndentSize - 1 <= node.Operator.Text.Length) ->
-            autoParenthesisIfExpressionExceedsPageWidth (genExpr node.LeftHandSide) ctx
-        | Expr.Match _ when (ctx.Config.IndentSize - 1 <= node.Operator.Text.Length) ->
-            let ctxAfterMatch = genExpr node.LeftHandSide ctx
+// let genMultilineInfixExpr (node: ExprInfixAppNode) =
+//     let genLhs (ctx: Context) =
+//         match node.LeftHandSide with
+//         | IsIfThenElse _ when (ctx.Config.IndentSize - 1 <= node.Operator.Text.Length) ->
+//             autoParenthesisIfExpressionExceedsPageWidth (genExpr node.LeftHandSide) ctx
+//         | Expr.Match _ when (ctx.Config.IndentSize - 1 <= node.Operator.Text.Length) ->
+//             let ctxAfterMatch = genExpr node.LeftHandSide ctx
+//
+//             let lastClauseIsSingleLine =
+//                 Queue.rev ctxAfterMatch.WriterEvents
+//                 |> Seq.skipWhile (fun e ->
+//                     match e with
+//                     | RestoreIndent _
+//                     | RestoreAtColumn _ -> true
+//                     | _ -> false)
+//                 // In case the last clause was multiline an UnIndent event should follow
+//                 |> Seq.tryHead
+//                 |> fun e ->
+//                     match e with
+//                     | Some(UnIndentBy _) -> false
+//                     | _ -> true
+//
+//             if lastClauseIsSingleLine then
+//                 ctxAfterMatch
+//             else
+//                 autoParenthesisIfExpressionExceedsPageWidth (genExpr node.LeftHandSide) ctx
+//         | lhsExpr -> genExpr lhsExpr ctx
+//
+//     atCurrentColumn (
+//         genLhs
+//         +> sepNln
+//         +> genSingleTextNode node.Operator
+//         +> sepNlnWhenWriteBeforeNewlineNotEmpty
+//         +> sepSpace
+//         +> genExprInMultilineInfixExpr node.RightHandSide
+//     )
 
-            let lastClauseIsSingleLine =
-                Queue.rev ctxAfterMatch.WriterEvents
-                |> Seq.skipWhile (fun e ->
-                    match e with
-                    | RestoreIndent _
-                    | RestoreAtColumn _ -> true
-                    | _ -> false)
-                // In case the last clause was multiline an UnIndent event should follow
-                |> Seq.tryHead
-                |> fun e ->
-                    match e with
-                    | Some(UnIndentBy _) -> false
-                    | _ -> true
-
-            if lastClauseIsSingleLine then
-                ctxAfterMatch
-            else
-                autoParenthesisIfExpressionExceedsPageWidth (genExpr node.LeftHandSide) ctx
-        | lhsExpr -> genExpr lhsExpr ctx
-
-    atCurrentColumn (
-        genLhs
-        +> sepNln
-        +> genSingleTextNode node.Operator
-        +> sepNlnWhenWriteBeforeNewlineNotEmpty
-        +> sepSpace
-        +> genExprInMultilineInfixExpr node.RightHandSide
-    )
-
-let genExprInMultilineInfixExpr (e: Expr) =
-    match e with
-    | Expr.CompExprBody node ->
-        let areLetOrUseStatementsEndingWithOtherStatement =
-            node.Statements
-            |> List.mapWithLast
-                (function
-                | ComputationExpressionStatement.LetOrUseStatement _ -> true
-                | _ -> false)
-                (function
-                 | ComputationExpressionStatement.OtherStatement _ -> true
-                 | _ -> false)
-            |> List.reduce (&&)
-
-        if not areLetOrUseStatementsEndingWithOtherStatement then
-            genExpr e
-        else
-            colWithNlnWhenMappedNodeIsMultiline
-                true
-                ComputationExpressionStatement.Node
-                (fun ces ->
-                    match ces with
-                    | ComputationExpressionStatement.LetOrUseStatement letOrUseNode ->
-                        let genIn =
-                            match letOrUseNode.In with
-                            | None -> !- "in"
-                            | Some inNode -> genSingleTextNode inNode
-
-                        genBinding letOrUseNode.Binding +> sepSpace +> genIn +> sepSpace
-                        |> genNode letOrUseNode
-                    | ComputationExpressionStatement.OtherStatement otherNode -> genExpr otherNode
-                    | _ -> failwith "unexpected ComputationExpressionStatement")
-                node.Statements
-            |> atCurrentColumn
-            |> genNode node
-    | Expr.Paren parenNode ->
-        match parenNode.Expr with
-        | Expr.Match _ as mex ->
-            fun ctx ->
-                if ctx.Config.MultiLineLambdaClosingNewline then
-                    genNode
-                        parenNode
-                        (genSingleTextNode parenNode.OpeningParen
-                         +> indentSepNlnUnindent (genExpr mex)
-                         +> sepNln
-                         +> genSingleTextNode parenNode.ClosingParen)
-                        ctx
-                else
-                    genNode
-                        parenNode
-                        (genSingleTextNode parenNode.OpeningParen
-                         +> atCurrentColumnIndent (genExpr mex)
-                         +> genSingleTextNode parenNode.ClosingParen)
-                        ctx
-        | Expr.InfixApp infixNode ->
-            match infixNode.LeftHandSide with
-            | Expr.Chain _ -> atCurrentColumnIndent (genExpr e)
-            | _ -> genExpr e
-        | Expr.Chain _
-        | Expr.Record _ -> atCurrentColumnIndent (genExpr e)
-        | _ -> genExpr e
-    | Expr.MatchLambda matchLambdaNode ->
-        genSingleTextNode matchLambdaNode.Function
-        +> indentSepNlnUnindent (genClauses matchLambdaNode.Clauses)
-        |> genNode matchLambdaNode
-    | Expr.Record _ -> atCurrentColumnIndent (genExpr e)
-    | _ -> genExpr e
+// let genExprInMultilineInfixExpr (e: Expr) =
+//     match e with
+//     | Expr.CompExprBody node ->
+//         let areLetOrUseStatementsEndingWithOtherStatement =
+//             node.Statements
+//             |> List.mapWithLast
+//                 (function
+//                 | ComputationExpressionStatement.LetOrUseStatement _ -> true
+//                 | _ -> false)
+//                 (function
+//                  | ComputationExpressionStatement.OtherStatement _ -> true
+//                  | _ -> false)
+//             |> List.reduce (&&)
+//
+//         if not areLetOrUseStatementsEndingWithOtherStatement then
+//             genExpr e
+//         else
+//             colWithNlnWhenMappedNodeIsMultiline
+//                 true
+//                 ComputationExpressionStatement.Node
+//                 (fun ces ->
+//                     match ces with
+//                     | ComputationExpressionStatement.LetOrUseStatement letOrUseNode ->
+//                         let genIn =
+//                             match letOrUseNode.In with
+//                             | None -> !- "in"
+//                             | Some inNode -> genSingleTextNode inNode
+//
+//                         genBinding letOrUseNode.Binding +> sepSpace +> genIn +> sepSpace
+//                         |> genNode letOrUseNode
+//                     | ComputationExpressionStatement.OtherStatement otherNode -> genExpr otherNode
+//                     | _ -> failwith "unexpected ComputationExpressionStatement")
+//                 node.Statements
+//             |> atCurrentColumn
+//             |> genNode node
+//     | Expr.Paren parenNode ->
+//         match parenNode.Expr with
+//         | Expr.Match _ as mex ->
+//             fun ctx ->
+//                 if ctx.Config.MultiLineLambdaClosingNewline then
+//                     genNode
+//                         parenNode
+//                         (genSingleTextNode parenNode.OpeningParen
+//                          +> indentSepNlnUnindent (genExpr mex)
+//                          +> sepNln
+//                          +> genSingleTextNode parenNode.ClosingParen)
+//                         ctx
+//                 else
+//                     genNode
+//                         parenNode
+//                         (genSingleTextNode parenNode.OpeningParen
+//                          +> atCurrentColumnIndent (genExpr mex)
+//                          +> genSingleTextNode parenNode.ClosingParen)
+//                         ctx
+//         // | Expr.InfixApp infixNode ->
+//         //     match infixNode.LeftHandSide with
+//         //     | Expr.Chain _ -> atCurrentColumnIndent (genExpr e)
+//         //     | _ -> genExpr e
+//         | Expr.Chain _
+//         | Expr.Record _ -> atCurrentColumnIndent (genExpr e)
+//         | _ -> genExpr e
+//     | Expr.MatchLambda matchLambdaNode ->
+//         genSingleTextNode matchLambdaNode.Function
+//         +> indentSepNlnUnindent (genClauses matchLambdaNode.Clauses)
+//         |> genNode matchLambdaNode
+//     | Expr.Record _ -> atCurrentColumnIndent (genExpr e)
+//     | _ -> genExpr e
 
 let genKeepIdentIfThenElse (ifKeyword: Node) (elseKeyword: Node) (e: Expr) ctx =
     let exprNode = Expr.Node e

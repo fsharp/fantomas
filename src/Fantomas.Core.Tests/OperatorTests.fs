@@ -1537,3 +1537,217 @@ let f a b = a + b
 
 let foo () = f %%"17" %%"42"
 """
+
+(*
+
+ ░▒▓██████▓▒░░▒▓██████████████▓▒░░▒▓███████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓███████▓▒░ ░▒▓██████▓▒░       ░▒▓████████▓▒░▒▓███████▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓███████▓▒░░▒▓███████▓▒░  
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░     ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░             ░▒▓█▓▒░     ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓██████▓▒░  ░▒▓██████▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒▒▓███▓▒░      ░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓████████▓▒░▒▓████████▓▒░▒▓███████▓▒░░▒▓███████▓▒░  
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░   ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░            ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░   ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░            ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓████████▓▒░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░   ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░       ░▒▓█▓▒░     ░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓
+
+*)
+
+(*
+Before we start:
+
+- Announcement: https://github.com/fsprojects/fantomas/issues/3112
+- v7: https://github.com/fsprojects/fantomas/pull/3123
+
+*)
+
+// Override config to similar multiline behavior
+let config = { config with MaxLineLength = 10 }
+
+// Skip setting https://fsprojects.github.io/fantomas/docs/end-users/Configuration.html#fsharp_max_infix_operator_expression
+
+[<Test>]
+let ``simple single line sample`` () =
+    formatSourceString
+        """
+1 + 2
+"""
+        config
+    |> prepend newline
+    |> should
+        equal
+        """
+1 + 2
+"""
+
+// Or should the `+` be on the line below?
+// Style guide to the rescue? https://learn.microsoft.com/en-us/dotnet/fsharp/style-guide/formatting#formatting-arithmetic-and-binary-expressions
+// Existing behavior: http://localhost:9060/fantomas-tools/#/fantomas/main?data=N4KABGBEDGD2AmBTSAuKBDTXNgNQB0AnfAOwCMLKqzIAacKAZ0QBcWBLEgc0dTAG0GEUBFFQAJCwCeAB2RpInFnSGjI4gG7oANgFd5A1WIAM9MWMgBJEkhIsAyuwBeyM%2BYgAWI2AC6qgL5uwt7q0nJ8inYq7upaegaC7hAAjEHmkACy6AAeADKciLmI3CwAFtFJycbefmKBqiLpkrIGkMXwAPIAZvkkiPbS2q4hmjr6fIlJAExpFgCiNt29w0lQ0ITaXZA1AWmNFs3hCmSwsNoVB3HjaJPuAMyzatbMhCwAYpw6AHKIAO7aBQu5hYhH0OzqexGYVaJzOQIgsTGCW8nkeCPsMnQ0EQACFEF1YIREAAFdCEdAAW1YiEI8NEILB7lqonqYn2akOMNO50eiPiExRYAArGioBisbj8YTCrBfjToOhmNYNLAFRxYCQ6RAGYhwSzITFORFYTyRldkasAGyiyDi7F4glEgCqMjkhAVSpIKrV7A1WrAXR0zD1EFZonZCKNx25dL510MqwA7Da7ZLHYgAMLaRWMDMaxgM6AsQn%2BwPaYNM3YNKEtY0x3mjfk3QUADhTmPtUqJGUQFLINNLQd1lYh1cN0LrcIb5oFqwAnO2JQ7pXntH7RWWK%2BZmaGDU0J9Gp2akbPKqZBbaO4gAIJdFg0vMUinof06kNgMPBce1w%2Bmw0z5tVmSVIL1TZciXsXt2DgNdNQ3Id30-MAIwkA8oBNWNG3jW5zGSGZQKvW970ISCKWgs510FN8R31Md9x-dD62PJsE0qB4CIla9CFgXQbAAEUQAEyOI19QWHbcqzZGsjigJRMIA1j3GSDwbSybJLC6AAVUpinsUpCRYAB1dh4DKf1qho3c6IONDImUacT0AyoRQvNSNO04o5nLfp9NeYzTPKUVLQsiTRyk78ZLs%2BTHMU3DrVcnJrC6dhsg6N10GLQg5myGQiUYRhfTg1sQrEHcPz3GyGKihyWJwsRkmTBLsgAJUQOBCHgfyzNFDwStEMqkJQ0IqrkmrsMFZI2ya1r2vgL5dD7Glukse8KV4UVkkQiqOVsildG0DgAT6N5CWfNgaU02sxotSoFwvGbCXgDJ9sOgoTsIM6RJtaBSjJLFiIAfV%2BEyzK26ydpGqJrtPdwpnPVZMhyLjySkDpCHyAsusC4qwfC%2BjItG5jxtWKYQIRtTkfQVH0fYAt5sWwhltW9aJtx8NpNaPaDvYI7EHez6Lquombth-CEcp6mMZYZ7ud5-mMq%2Bi8fr%2BosaSBkHyjZr98daQn-xiurRCmdjyZyAA1JEcU4eBOC4LH-RbPqIAG7bI1svWmgUw2ICmFSmreXii0Kq2bFt%2B2eqd3xJPZiLdah4WYfMKYXNN7I%2BNgFgAHFWGy3LEHywrw5xyzyvBt2qow6GnNh%2BKEZ%2Bf4CjxFg5WKS65AE5KSHYdUSGvGwewZlnVmo0LaLxyrIsrhPq6TxrxYBLgSADkgg41RxF4y3QiU02BrFsFgMsKwdvK15COcnP9PYNwUpim%2BfiJIQ%2BNBlbgB-7QgO84bvCqHpJN3E0q0dtYTy5EefWtUb53XJi9dgyxciUjIPAdAWZYAFW4PXXmx8tyALCjHHWF9ooQNWHceGSRIC5xpOwKkdgdAAGlECIBkHvYoLBrA4nJCvbGqx-6nyGlGRiYCr5EKSHcMmZCcTZhIAAa2WIwLiPEbA-ALIgJ6MDea5zygVfMolGSjysuPCGk8mLgOJiIsW4iyTgUQHxWm6wqGfHvPAJ0XcNQCWgNmckPcsEAP6kAs%2BscIhc1en0dhWIpGsAGFIIYhDTH3BNmQmWwTcTkmgOEhwgwVhkPWJSOQ8Btgl0GufBQHtLjX2IX7BG9DGFqXpu-boEj0DSNkf6KokcXZl1QhXYxQjYnmDuCnMhGDG5dkQIknmBRHwyF0AfHuGj85aKKsPMSvCikCMvqU4R9xa5kIoYQKhLCdBeTIowLhf8EIFIYD4NwihGBvAKnwHh-ggA
+
+[<Test>]
+let ``multiline example`` () =
+    formatSourceString
+        """
+aaaaaaaa + bbbbbbbbbbb
+"""
+        config
+    |> prepend newline
+    |> should
+        equal
+        """
+aaaaaaaa +
+bbbbbbbbbbb
+"""
+
+// What about non-arithmetic operators
+// https://github.com/fsharp/fslang-design/issues/687
+
+[<Test>]
+let ``going fishing`` () =
+    formatSourceString
+        """
+aaaaaaaaa >=> bbbbbbbbbbbb
+"""
+        config
+    |> prepend newline
+    |> should
+        equal
+        """
+aaaaaaaaa
+>=> bbbbbbbbbbbb
+"""
+
+// Some operators can never be break
+// Example: http://localhost:9060/fantomas-tools/#/ast?data=N4KABGBEAmCmBmBLAdrAzpAXFSAacUiaAYmolmPAIYA2as%2BEkAxgPZwWRXc-dgC8AHQBOg5ACNJU6eLwFIsAB4AHKsmgUALsICusEAF8gA
+
+[<Test>]
+let ``never break`` () =
+    formatSourceString
+        """
+aaaaaaa = bbbbbbb
+"""
+        config
+    |> prepend newline
+    |> should
+        equal
+        """
+aaaaaaa = bbbbbbb
+"""
+
+// But what is the right hand side is multiline?
+
+[<Test>]
+let ``equals with multiline rhs`` () =
+    formatSourceString
+        """
+x.FooBar = Some y
+"""
+        { config with MaxLineLength = 5 }
+    |> prepend newline
+    |> should
+        equal
+        """
+x.FooBar =
+    Some
+        y
+"""
+
+// When having multiple operators, you sometimes want group them
+
+[<Test>]
+let ``multiple pipes`` () =
+    formatSourceString
+        """
+aa |> bb |> cccccccccccccc
+"""
+        config
+    |> prepend newline
+    |> should
+        equal
+        """
+aa
+|> bb
+|> cccccccccccccc
+"""
+
+// Keeping indentation flow is hard
+// Related: https://github.com/fsprojects/fantomas/issues/3117
+
+[<Test>]
+let ``indentation flow`` () =
+    formatSourceString
+        """
+let v =
+    expr1
+    +> if a then b else c
+"""
+        config
+    |> prepend newline
+    |> should
+        equal
+        """
+let v =
+    expr1
+    +> if
+            a
+        then
+            b
+        else
+            c
+"""
+
+// arithmetic operator cannot always be on the right side
+
+[<Test>]
+let ``patterns matching and lambda are though`` () =
+    formatSourceString
+        """
+    match [] with | [] -> 0 | _ -> 42
+            +
+                2
+"""
+        config
+    |> prepend newline
+    |> should
+        equal
+        """
+match
+    []
+with
+| [] -> 0
+| _ -> 42
++ 2
+"""
+
+[<Test>]
+let ``parens to the rescue`` () =
+    formatSourceString
+        """
+(match [] with | [] -> 0 | _ -> 42) + 2
+"""
+        config
+    |> prepend newline
+    |> should
+        equal
+        """
+(match
+    []
+ with
+ | [] -> 0
+ | _ -> 42) +
+2
+"""
+
+// How about arithmetic operators until the line is full?
+
+[<Test>]
+let ``place expressions until the line is full`` () =
+    formatSourceString
+        """
+a + b + c + d
+"""
+        config
+    |> prepend newline
+    |> should
+        equal
+        """
+a + b + c +
+d
+"""

@@ -645,10 +645,10 @@ type ExprLazyNode(lazyWord: SingleTextNode, expr: Expr, range) =
     member val LazyWord = lazyWord
     member val Expr = expr
 
-    member val ExprIsInfix =
-        match Expr.Node expr with
-        | :? InfixApp -> true
-        | _ -> false
+    member val ExprIsInfix = false
+// match Expr.Node expr with
+// | :? InfixApp -> true
+// | _ -> false
 
 type ExprSingleNode(leading: SingleTextNode, addSpace: bool, supportsStroustrup: bool, expr: Expr, range) =
     inherit NodeBase(range)
@@ -1159,11 +1159,11 @@ type ExprPrefixAppNode(operator: SingleTextNode, expr: Expr, range) =
     member val Operator = operator
     member val Expr = expr
 
-type InfixApp = interface end
-
+// type InfixApp = interface end
+//
 type ExprSameInfixAppsNode(leadingExpr: Expr, subsequentExpressions: (SingleTextNode * Expr) list, range) =
     inherit NodeBase(range)
-    interface InfixApp
+    // interface InfixApp
 
     override val Children: Node array =
         let xs =
@@ -1176,7 +1176,7 @@ type ExprSameInfixAppsNode(leadingExpr: Expr, subsequentExpressions: (SingleText
 
 type ExprInfixAppNode(lhs: Expr, operator: SingleTextNode, rhs: Expr, range) =
     inherit NodeBase(range)
-    interface InfixApp
+    // interface InfixApp
 
     override val Children: Node array = [| yield Expr.Node lhs; yield operator; yield Expr.Node rhs |]
     member val LeftHandSide = lhs

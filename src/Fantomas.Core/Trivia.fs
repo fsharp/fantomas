@@ -180,8 +180,8 @@ let rec visitLastChildNode (node: Node) : Node =
     | :? ExprIfThenElseNode
     | :? ExprIfThenElifNode
     | :? ExprAppNode
-    | :? ExprSameInfixAppsNode
-    | :? ExprInfixAppNode
+    // | :? ExprSameInfixAppsNode
+    // | :? ExprInfixAppNode
     | :? ExprLambdaNode
     | :? ExprLetOrUseNode
     | :? ExprLetOrUseBangNode

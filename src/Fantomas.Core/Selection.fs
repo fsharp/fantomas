@@ -222,12 +222,12 @@ let mkTreeWithSingleNode (node: Node) : TreeForSelection =
     | :? ExprPrefixAppNode as node ->
         let expr = Expr.PrefixApp node
         mkOakFromModuleDecl (ModuleDecl.DeclExpr expr)
-    | :? ExprSameInfixAppsNode as node ->
-        let expr = Expr.SameInfixApps node
-        mkOakFromModuleDecl (ModuleDecl.DeclExpr expr)
-    | :? ExprInfixAppNode as node ->
-        let expr = Expr.InfixApp node
-        mkOakFromModuleDecl (ModuleDecl.DeclExpr expr)
+    //    | :? ExprSameInfixAppsNode as node ->
+    //        let expr = Expr.SameInfixApps node
+    //        mkOakFromModuleDecl (ModuleDecl.DeclExpr expr)
+    //    | :? ExprInfixAppNode as node ->
+    //        let expr = Expr.InfixApp node
+    //        mkOakFromModuleDecl (ModuleDecl.DeclExpr expr)
     | :? ExprIndexWithoutDotNode as node ->
         let expr = Expr.IndexWithoutDot node
         mkOakFromModuleDecl (ModuleDecl.DeclExpr expr)
